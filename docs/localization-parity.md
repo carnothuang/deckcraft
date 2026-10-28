@@ -14,7 +14,7 @@ engine, the native macOS menu bar and some dialog choice lists. Other requests: 
 (Ukrainian) and the language PRs listed in storytold/craft-i18n#48, which can now land as
 catalog-only PRs there. Dimension score: **~15% ready** (estimated: English complete, German
 mostly, slide-text script
-support partly there), **55–90 h** to parity plus native-speaker review.
+support partly there), **45–80 h** to parity plus native-speaker review.
 
 ## How the numbers are measured
 
