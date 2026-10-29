@@ -192,6 +192,7 @@ fn exact_of(d: &Dialog, key: &str) -> Option<f64> {
 
 /// Draw a labelled single-line text row bound to a dialog key and store the edited value.
 fn text_row(ui: &mut Ui, d: &mut Dialog, label: &str, key: &str) {
+    let label = tl!(label);
     let mut v = field_of(d, key);
     ui.horizontal(|ui| {
         let l = ui.add_sized(vec2(148.0, 20.0), egui::Label::new(label));
@@ -273,6 +274,7 @@ fn choice(ui: &mut Ui, d: &mut Dialog, salt: &str, name: &str, key: &str, choice
 }
 
 fn labeled_text(ui: &mut Ui, d: &mut Dialog, label: &str, key: &str, width: f32) -> String {
+    let label = tl!(label);
     let mut v = d.get(key, "");
     let l = ui.label(label);
     ui.add(egui::TextEdit::singleline(&mut v).desired_width(width)).labelled_by(l.id);

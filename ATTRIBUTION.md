@@ -76,7 +76,10 @@ They are text, not files in this repository; without the checkout the interface 
 
 | Asset | Author | Source | Licence | Use |
 |---|---|---|---|---|
-| craft-i18n interface catalogs | craft-i18n translators, credited in its [ATTRIBUTION.md](https://github.com/storytold/craft-i18n/blob/main/ATTRIBUTION.md) | https://github.com/storytold/craft-i18n at `craft-i18n.rev` | MIT OR Apache-2.0 | Interface languages other than English (German first); clean-room translations from the English interface labels |
+| `craft-i18n/locales/de/common.tsv` | craft-i18n translators, credited in its [ATTRIBUTION.md](https://github.com/storytold/craft-i18n/blob/main/ATTRIBUTION.md) | https://github.com/storytold/craft-i18n at `craft-i18n.rev` | MIT OR Apache-2.0 | German shared interface strings |
+| `craft-i18n/locales/de/deckcraft.tsv` | craft-i18n translators, credited in its [ATTRIBUTION.md](https://github.com/storytold/craft-i18n/blob/main/ATTRIBUTION.md) | https://github.com/storytold/craft-i18n/pull/71 at `0c37940` (moves into `craft-i18n.rev` when merged) | MIT OR Apache-2.0 | German DeckCraft interface strings |
+| `craft-i18n/locales/zh-hans/common.tsv` | craft-i18n translators, credited in its [ATTRIBUTION.md](https://github.com/storytold/craft-i18n/blob/main/ATTRIBUTION.md) | https://github.com/storytold/craft-i18n at `craft-i18n.rev` | MIT OR Apache-2.0 | Simplified Chinese shared interface strings |
+| `craft-i18n/locales/zh-hans/deckcraft.tsv` | @carnothuang with DeepSeek V4.1 Flash (AI-assisted), not yet reviewed by a native speaker | https://github.com/storytold/craft-i18n/pull/75 at `c73be58` (moves into `craft-i18n.rev` when merged) | MIT OR Apache-2.0 | Simplified Chinese DeckCraft interface strings, clean-room translations from the English labels |
 
 ## PDF writer colour profiles
 

@@ -40,6 +40,10 @@ fn main() {
 /// The catalog this app reads in each locale: `locales/<locale>/deckcraft.tsv`.
 const APP_CATALOG: &str = "deckcraft.tsv";
 
+/// Catalogs a required build must embed, besides English (the source text, which has none).
+/// Keep in sync with `LANGUAGES` in `src/i18n.rs`; a release must not silently drop one.
+const REQUIRED_CATALOGS: &[&str] = &["de", "zh-hans"];
+
 /// `CRAFT_I18N` from `CRAFT_I18N_DIR`: the `Embedded` list the craft-i18n crate reads.
 fn craft_i18n() -> String {
     println!("cargo::rerun-if-env-changed=CRAFT_I18N_DIR");
@@ -62,6 +66,9 @@ fn craft_i18n() -> String {
             Vec::new()
         }
     };
+    if required && let Err(e) = require_catalogs(&entries) {
+        println!("cargo::error={e}");
+    }
     let mut o = String::from("/// (locale, shared catalog, DeckCraft's catalog), one entry per locale; `\"\"` for a missing file.\n");
     o.push_str("pub static CRAFT_I18N: &craft_i18n::Embedded = &[\n");
     for (code, shared, app) in entries {
@@ -75,6 +82,14 @@ fn craft_i18n() -> String {
 
 /// A locale's code, its `common.tsv` if any, and its app catalog.
 type Locale = (String, Option<std::path::PathBuf>, std::path::PathBuf);
+
+/// Every required locale must have an app catalog in a required checkout, so a release cannot
+/// ship with one advertised language silently missing.
+fn require_catalogs(entries: &[Locale]) -> Result<(), String> {
+    let missing: Vec<&str> =
+        REQUIRED_CATALOGS.iter().copied().filter(|code| !entries.iter().any(|(locale, _, _)| locale.eq_ignore_ascii_case(code))).collect();
+    if missing.is_empty() { Ok(()) } else { Err(format!("CRAFT_I18N_REQUIRED=1 but these locales have no {APP_CATALOG}: {}", missing.join(", "))) }
+}
 
 /// Every locale under `dir` with this app's catalog, by code: (code, its `common.tsv` if any, its
 /// app catalog). An error when `dir` isn't a craft-i18n `locales/` directory.

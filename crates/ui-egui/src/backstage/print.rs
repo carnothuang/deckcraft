@@ -96,17 +96,18 @@ pub(super) fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                 PrintScope::Current => "Print Current Slide",
                 PrintScope::Custom => "Custom Range",
             };
+            let scope = tl!(scope);
             let combo = craft_ui::ComboBox::from_id_salt("backstage_print_scope").width(240.0).selected_text(scope).show_ui(ui, |ui| {
                 for (s, label) in
                     [(PrintScope::All, "Print All Slides"), (PrintScope::Current, "Print Current Slide"), (PrintScope::Custom, "Custom Range")]
                 {
-                    if ui.selectable_label(bs.print_scope == s, label).clicked() {
+                    if ui.selectable_label(bs.print_scope == s, tl!(label)).clicked() {
                         bs.print_scope = s;
                         bs.preview_page = 0;
                     }
                 }
             });
-            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Print range"));
+            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, tl!("Print range")));
             ui.add_space(4.0);
             ui.horizontal(|ui| {
                 let l = ui.label(tl!("Slides:"));
@@ -119,15 +120,16 @@ pub(super) fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
             });
             ui.add_space(4.0);
             let layout = LAYOUTS.iter().find(|l| l.0 == bs.print_layout).map_or("Full Page Slides", |l| l.1);
+            let layout = tl!(layout);
             let combo = craft_ui::ComboBox::from_id_salt("backstage_print_layout").width(240.0).selected_text(layout).show_ui(ui, |ui| {
                 for (id, label) in LAYOUTS {
-                    if ui.selectable_label(bs.print_layout == id, label).clicked() {
+                    if ui.selectable_label(bs.print_layout == id, tl!(label)).clicked() {
                         bs.print_layout = id;
                         bs.preview_page = 0;
                     }
                 }
             });
-            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, "Print layout"));
+            combo.response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::ComboBox, true, tl!("Print layout")));
             ui.add_space(4.0);
             // PowerPoint prints full-page slides on slide-shaped pages; paper and orientation are
             // for notes pages and handouts.

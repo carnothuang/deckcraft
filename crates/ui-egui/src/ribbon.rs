@@ -130,56 +130,66 @@ pub fn show(app: &mut SlideApp, ui: &mut Ui) {
     egui::Panel::top("ribbon").exact_size(h).frame(egui::Frame::NONE.fill(t.chrome)).show(ui, |ui| {
         let rect = ui.max_rect();
         // Tabs. File comes first and opens the File tab's full-window view (Backstage), as in
-        // PowerPoint.
-        let mut x = rect.min.x + 12.0;
-        let y = rect.min.y + 2.0;
-        {
-            let w = ui.fonts_mut(|f| f.layout_no_wrap(tl!("File").to_string(), theme::font(13.0), t.text).size().x) + 18.0;
-            let r = Rect::from_min_size(pos2(x, y), vec2(w, 24.0));
-            let resp = ui.interact(r, ui.scope_id().with("tab_file"), Sense::click());
-            resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tl!("File")));
-            if resp.hovered() {
-                ui.painter().rect_filled(r.shrink2(vec2(2.0, 2.0)), CornerRadius::same(4), t.hover);
-            }
-            ui.painter().text(r.center(), Align2::CENTER_CENTER, tl!("File"), theme::font(13.0), t.text);
-            if resp.on_hover_text(format!("{} ({})", tl!("File"), pretty_shortcut("Alt+F"))).clicked() {
-                app.open_backstage(crate::backstage::Page::Home);
-            }
-            x += w + 2.0;
-        }
-        let all: Vec<(&str, bool)> = TABS.iter().map(|s| (*s, false)).chain(ctx_tabs.iter().map(|s| (*s, true))).collect();
-        for (name, contextual) in all {
-            // `name` is the tab's id (`app.ui.tab`, `view.tab`); only its caption is translated.
-            let caption = tl!(name);
-            let font = theme::font(13.0);
-            let w = ui.fonts_mut(|f| f.layout_no_wrap(caption.to_string(), font.clone(), t.text).size().x) + 18.0;
-            let r = Rect::from_min_size(pos2(x, y), vec2(w, 24.0));
-            let resp = ui.interact(r, ui.scope_id().with(("tab", name)), Sense::click());
-            resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, caption));
-            let active = app.ui.tab == name;
-            if resp.hovered() && !active {
-                ui.painter().rect_filled(r.shrink2(vec2(2.0, 2.0)), CornerRadius::same(4), t.hover);
-            }
-            let col = if contextual { t.contextual } else { t.text };
-            let f = if active { theme::bold(13.0) } else { font };
-            ui.painter().text(r.center(), Align2::CENTER_CENTER, caption, f, col);
-            if active {
-                let uw = (w - 20.0).max(16.0);
-                ui.painter().rect_filled(Rect::from_center_size(pos2(r.center().x, r.max.y - 1.0), vec2(uw, 3.0)), CornerRadius::same(1), t.accent);
-            }
-            if resp.clicked() {
-                if active {
-                    app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
-                } else {
-                    app.ui.tab = name.to_string();
-                    app.ui.ribbon_collapsed = false;
-                }
-            }
-            if resp.double_clicked() {
-                app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
-            }
-            x += w + 2.0;
-        }
+        // PowerPoint. The row scrolls horizontally so a translation with wider captions keeps
+        // every tab reachable; the ribbon body has its own independent scroll area.
+        let row = Rect::from_min_size(pos2(rect.min.x + 8.0, rect.min.y + 2.0), vec2(rect.width() - 16.0, 24.0));
+        let mut row_ui = ui.new_child(egui::UiBuilder::new().max_rect(row));
+        row_ui.set_clip_rect(row);
+        egui::ScrollArea::horizontal()
+            .id_salt("ribbon_tabs")
+            .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
+            .auto_shrink([false, false])
+            .show(&mut row_ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 2.0;
+                    ui.add_space(4.0);
+                    let tab_button = |ui: &mut Ui, name: &str, caption: &str, contextual: bool, active: bool| {
+                        let font = theme::font(13.0);
+                        let w = ui.fonts_mut(|f| f.layout_no_wrap(caption.to_string(), font.clone(), t.text).size().x) + 18.0;
+                        let (r, _) = ui.allocate_exact_size(vec2(w, 24.0), Sense::hover());
+                        let id = if name == "File" { ui.scope_id().with("tab_file") } else { ui.scope_id().with(("tab", name)) };
+                        let resp = ui.interact(r, id, Sense::click());
+                        resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, caption));
+                        if resp.hovered() && !active {
+                            ui.painter().rect_filled(r.shrink2(vec2(2.0, 2.0)), CornerRadius::same(4), t.hover);
+                        }
+                        let col = if contextual { t.contextual } else { t.text };
+                        let f = if active { theme::bold(13.0) } else { font };
+                        ui.painter().text(r.center(), Align2::CENTER_CENTER, caption, f, col);
+                        if active {
+                            let uw = (w - 20.0).max(16.0);
+                            ui.painter().rect_filled(
+                                Rect::from_center_size(pos2(r.center().x, r.max.y - 1.0), vec2(uw, 3.0)),
+                                CornerRadius::same(1),
+                                t.accent,
+                            );
+                        }
+                        resp
+                    };
+                    let resp = tab_button(ui, "File", tl!("File"), false, false);
+                    if resp.on_hover_text(format!("{} ({})", tl!("File"), pretty_shortcut("Alt+F"))).clicked() {
+                        app.open_backstage(crate::backstage::Page::Home);
+                    }
+                    let all: Vec<(&str, bool)> = TABS.iter().map(|s| (*s, false)).chain(ctx_tabs.iter().map(|s| (*s, true))).collect();
+                    for (name, contextual) in all {
+                        // `name` is the tab's id (`app.ui.tab`, `view.tab`); only its caption is translated.
+                        let caption = tl!(name);
+                        let active = app.ui.tab == name;
+                        let resp = tab_button(ui, name, caption, contextual, active);
+                        if resp.clicked() {
+                            if active {
+                                app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
+                            } else {
+                                app.ui.tab = name.to_string();
+                                app.ui.ribbon_collapsed = false;
+                            }
+                        }
+                        if resp.double_clicked() {
+                            app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
+                        }
+                    }
+                });
+            });
         if app.ui.ribbon_collapsed {
             return;
         }
