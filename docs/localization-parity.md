@@ -1,20 +1,21 @@
 # Localization parity with PowerPoint
 
-> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-28 · **Change:** major (interface catalogs from craft-i18n, language setting, German; previous: minor, opt-in native LXGW WenKai Lite fallback and interface CJK tests; local implementation only, managed validation pending; previous: minor, IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
+> **Last reviewed:** 2026-10-29 · **Last updated:** 2026-10-29 · **Change:** minor (Simplified Chinese interface catalog from craft-i18n: 1,089 DeckCraft rows plus shared rows, CJK faces borrowed for the UI's own text; previous: major, interface catalogs from craft-i18n, language setting and German) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 > **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-21 · **Change:** minor (one proofing language for the whole presentation; previous: minor, IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
-DeckCraft's interface is shown in English or German. Strings stay English literals in the code and
-are looked up in the shared [craft-i18n](https://github.com/storytold/craft-i18n) catalogs when the
-UI is drawn (`tl!`, `crates/ui-egui/src/i18n.rs`); `build.rs` embeds them from `CRAFT_I18N_DIR` at
-the commit in `craft-i18n.rev`, and a build without it is English only. The interface follows the
-system language (#15), or Preferences › Interface language and `app.language` (`auto`, `en`,
-`de`). Command ids, engine labels returned to scripts, the control channel, the CLI and MCP stay
-English. Still English: slide placeholder prompts (drawn by the renderer), status messages from the
-engine, the native macOS menu bar and some dialog choice lists. Other requests: #30 and PR #34
-(Ukrainian) and the language PRs listed in storytold/craft-i18n#48, which can now land as
-catalog-only PRs there. Dimension score: **~15% ready** (estimated: English complete, German
-mostly, slide-text script
-support partly there), **45–80 h** to parity plus native-speaker review.
+DeckCraft's interface is shown in English, German or Simplified Chinese. Strings stay English
+literals in the code and are looked up in the shared
+[craft-i18n](https://github.com/storytold/craft-i18n) catalogs when the UI is drawn (`tl!`,
+`crates/ui-egui/src/i18n.rs`); `build.rs` embeds them from `CRAFT_I18N_DIR` at the commit in
+`craft-i18n.rev`, and a build without it is English only. The interface follows the system
+language (#15), or Preferences › Interface language and `app.language` (`auto`, `en`, `de`,
+`zh-hans`). Command ids, engine labels returned to scripts, the control channel, the CLI and MCP
+stay English. Still English: slide placeholder prompts (drawn by the renderer), status messages
+from the engine, the native macOS menu bar and some dialog choice lists. Other requests: #30 and
+PR #34 (Ukrainian) and the language PRs listed in storytold/craft-i18n#48, which can now land as
+catalog-only PRs there. Dimension score: **~20% ready** (estimated: English complete, German
+mostly, Simplified Chinese partial, slide-text script support partly there), **40–75 h** to
+parity plus native-speaker review.
 
 ## How the numbers are measured
 
@@ -34,7 +35,7 @@ support partly there), **45–80 h** to parity plus native-speaker review.
 | Language | Code | UI strings translated | Dialogs / tooltips / help | Script support (slide text) | Native review | Status | PowerPoint for Mac UI | Hours to full |
 |---|---|---|---|---|---|---|---|---|
 | English | en | ~1,050 / ~1,050 (100%) | yes / yes / no help | full | yes | **full** | yes | 0 |
-| Simplified Chinese (Mandarin) | zh-Hans | 0 (0%) | no | native candidate optionally embeds LXGW WenKai Lite via craft-fonts, with existing per-character fallback; other builds use system CJK fonts (Noto CJK remains excluded); UAX #14 breaking; IME composition (#101); no true vertical layout | no | none | yes | 6–10 (incl. IME) |
+| Simplified Chinese (Mandarin) | zh-Hans | 1,089 DeckCraft rows + shared `common.tsv` (partial; dynamic `format!` strings stay English) | partly / yes / no help | native candidate optionally embeds LXGW WenKai Lite via craft-fonts, with existing per-character fallback; other builds use system CJK fonts (Noto CJK remains excluded); UAX #14 breaking; IME composition (#101); no true vertical layout | no | **partial** | yes | 2–4 + review |
 | Spanish | es | 0 (0%) | no | full (Latin) | no | none | yes (es, es-MX) | 3–5 |
 | Hindi | hi | 0 (0%) | no | Devanagari shaping through HarfRust, untested; no bundled Devanagari font | no | none | **no** (Windows only) | 4–7 |
 | Arabic | ar | 0 (0%) | no | bidi, contextual shaping, kashida justification, RTL bullets and caret (#4); **UI not mirrored**; browser export shows boxes (#81) | no | none | yes | 10–16 (incl. UI mirroring) |
@@ -46,7 +47,7 @@ support partly there), **45–80 h** to parity plus native-speaker review.
 | Korean | ko | 0 (0%) | no | system Hangul fonts, in the interface too; IME composition (#101) | no | none | yes | 4–7 |
 | Vietnamese | vi | 0 (0%) | no | stacked diacritics through HarfRust | no | none | **no** (Windows only) | 3–5 |
 
-Other languages shipped: **German** (Ukrainian is in review as PR #34). PowerPoint for Mac ships 16 more
+Other languages shipped: **German and Simplified Chinese** (Ukrainian is in review as PR #34). PowerPoint for Mac ships 16 more
 than the twelve above: Czech, Danish, Greek, Finnish, Hebrew, Hungarian, Italian, Dutch, Norwegian,
 Polish, Russian, Slovak, Swedish, Thai, Turkish and Traditional Chinese.
 
@@ -70,6 +71,7 @@ of every text in the file and the default for new text (`format.languageAll`).
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-10-29 | minor | Simplified Chinese interface catalog (`zh-hans/deckcraft.tsv` in craft-i18n: 1,089 DeckCraft rows plus shared rows), offered as `zh-hans` and drawn with CJK faces borrowed for the UI's own catalog text. Dynamic strings still assembled with `format!` before drawing stay English until the source uses `tl!`/`fmt`. No native review yet. |
 | 2026-10-28 | major | Interface catalogs from craft-i18n, system language and Preferences › Interface language (#15); German partial (~840 rows) |
 | 2026-10-24 | minor | Local 0.37 candidate adds an opt-in native LXGW WenKai Lite glyph fallback and CJK interface-test coverage. This records local implementation only: managed tests, formatting, clippy, wasm-size and native GUI qualification remain pending. Browser font budget and uniform Chinese typography are unchanged. |
 | 2026-10-21 | minor | Review › Language can set the proofing language of the whole presentation |

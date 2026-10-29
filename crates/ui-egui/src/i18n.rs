@@ -56,10 +56,13 @@ pub const AUTO: &str = "auto";
 /// The languages DeckCraft offers, as lowercase BCP 47 codes (also the `language` setting's value
 /// and the craft-i18n locale), when their catalogs are embedded. English first: it is the source
 /// language and the fallback.
-pub static LANGUAGES: [&str; 2] = [
+pub static LANGUAGES: [&str; 3] = [
     "en", // German, neutral across Germany, Austria and Switzerland; `de-DE`, `de-AT`, `de_CH.UTF-8` …
     // resolve here.
     "de",
+    // Simplified Chinese; `zh-CN`, `zh-SG` and `zh-Hans-*` resolve here. Traditional Chinese
+    // (`zh-hant`, `zh-TW`, `zh-HK`) is a separate catalog and stays English until it exists.
+    "zh-hans",
 ];
 
 /// A language the UI can be shown in: English, or an offered language whose catalogs are embedded.
@@ -209,6 +212,26 @@ pub fn tn(n: u64, one: &str, other: &str) -> String {
 /// A ribbon location (`Home › Font`) in the current language, segment by segment.
 pub fn location(loc: &str) -> String {
     loc.split(" › ").map(t).collect::<Vec<_>>().join(" › ")
+}
+
+/// Every translation in `lang`'s embedded catalogs, for the interface font fallback: the UI must
+/// be able to draw its own labels before a presentation in that script is open. The raw catalog
+/// columns are enough; `UiFonts` only looks at the characters (`\n` stays an escape, which is
+/// harmless there).
+pub fn translations(lang: Lang) -> impl Iterator<Item = &'static str> {
+    let code = lang.code();
+    CRAFT_I18N
+        .iter()
+        .filter(move |(locale, _, _)| locale.eq_ignore_ascii_case(code))
+        .flat_map(|(_, shared, app)| [*shared, *app])
+        .flat_map(str::lines)
+        .filter(|line| !line.trim().is_empty() && !line.trim_start().starts_with('#'))
+        .filter_map(|line| {
+            let mut columns = line.split('\t');
+            columns.next()?;
+            columns.next()?;
+            columns.next()
+        })
 }
 
 /// A test language whose DeckCraft catalog is `source` (catalog format), so tests of lookup code

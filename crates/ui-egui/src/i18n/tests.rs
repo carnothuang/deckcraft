@@ -71,7 +71,11 @@ fn app_language_reports_and_changes_the_setting() {
     let v = app.run("app.language", json!({})).unwrap();
     assert_eq!((v["language"].as_str(), v["current"].as_str()), (Some(AUTO), Some("en")));
     let codes: Vec<&str> = v["available"].as_array().unwrap().iter().filter_map(|l| l["code"].as_str()).collect();
-    assert_eq!(codes, ["en", "de"]);
+    let mut expected = vec!["en", "de"];
+    if CRAFT_I18N.iter().any(|(code, ..)| *code == "zh-hans") {
+        expected.push("zh-hans");
+    }
+    assert_eq!(codes, expected);
     let v = app.run("app.language", json!({"language": "DE"})).unwrap();
     assert_eq!((v["language"].as_str(), v["current"].as_str()), (Some("de"), Some("de")));
     assert_eq!(app.ui.language, "de");
@@ -145,4 +149,22 @@ fn embedded_catalogs_parse_cleanly() {
     for (code, ..) in CRAFT_I18N {
         assert!(LANGUAGES.contains(code), "{code} is embedded but not offered");
     }
+}
+
+/// The Simplified Chinese catalogs reached the strings the UI draws, including the shared
+/// `common.tsv` rows and a named-placeholder status line. Skipped without `CRAFT_I18N_DIR`.
+#[test]
+fn the_chinese_catalog_translates_core_labels() {
+    let Some(zh) = Lang::from_code("zh-hans") else {
+        eprintln!("skipped: the zh-hans catalogs are not embedded");
+        return;
+    };
+    assert_eq!(tr(zh, "File"), "文件");
+    assert_eq!(tr(zh, "Insert"), "插入");
+    assert_eq!(tr(zh, "Cancel"), "取消");
+    assert_eq!(tr(zh, "Slide Show"), "幻灯片放映");
+    assert_eq!(fmt(tr(zh, "Slide {n} of {total}"), &[("n", "1"), ("total", "8")]), "第 1 张，共 8 张");
+    // The same catalog rows are what the interface font fallback borrows faces for.
+    let text: String = translations(zh).collect::<Vec<_>>().join("\n");
+    assert!(text.contains("文件") && text.contains("幻灯片放映"), "catalog text is available to UiFonts");
 }

@@ -335,11 +335,16 @@ Detail in [hardware-parity.md](hardware-parity.md).
 
 Detail in [localization-parity.md](localization-parity.md).
 
-- **English and German only** (#15, #30; Ukrainian PR #34 open). The interface reads the shared
-  craft-i18n catalogs and follows the system language; German covers the ribbon, menus, palette,
-  status bar, File tab, dialogs and panes. PowerPoint for Mac ships 26 languages: 3–16 h per
-  language plus native review. Beta needs at least Simplified Chinese, Spanish, French and Japanese
-  as well (~25–40 h).
+- **English, German and Simplified Chinese only** (#15, #30; Ukrainian PR #34 open). The interface
+  reads the shared craft-i18n catalogs and follows the system language; German covers the ribbon,
+  menus, palette, status bar, File tab, dialogs and panes, and Simplified Chinese adds 1,089
+  DeckCraft rows plus the shared rows (dynamic `format!` strings still English). PowerPoint for Mac
+  ships 26 languages: 3–16 h per language plus native review. Beta needs at least Spanish, French
+  and Japanese as well (~20–35 h).
+- **Simplified Chinese interface text needs an installed CJK font.** `UiFonts` borrows a face for
+  the catalog's own text (PingFang, Noto Sans CJK, WenQuanYi…), so labels draw before a
+  presentation with Chinese text is open; a system with none draws boxes. Bundling an openly
+  licensed Chinese face in craft-fonts (LXGW WenKai Lite, OFL) for the web build: 2–4 h.
 - **Hangul in the interface needs an installed Korean font** (#101). craft-fonts has no Korean face
   (Noto CJK is excluded by the asset policy), so the web build draws Korean file names, notes and
   outline text as boxes; desktop borrows Malgun Gothic, Apple SD Gothic Neo or Noto Sans CJK.
