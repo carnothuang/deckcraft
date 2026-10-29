@@ -171,21 +171,33 @@ pub fn show(app: &mut SlideApp, ui: &mut Ui) {
                         app.open_backstage(crate::backstage::Page::Home);
                     }
                     let all: Vec<(&str, bool)> = TABS.iter().map(|s| (*s, false)).chain(ctx_tabs.iter().map(|s| (*s, true))).collect();
+                    let pending = ui.scope_id().with("ribbon_tab_click");
                     for (name, contextual) in all {
                         // `name` is the tab's id (`app.ui.tab`, `view.tab`); only its caption is translated.
                         let caption = tl!(name);
                         let active = app.ui.tab == name;
                         let resp = tab_button(ui, name, caption, contextual, active);
-                        if resp.clicked() {
+                        if resp.clicked() && !resp.double_clicked() {
+                            // The first release of a double-click acts immediately; remember whether
+                            // this tab was active so the second release does not toggle again.
                             if active {
                                 app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
                             } else {
                                 app.ui.tab = name.to_string();
                                 app.ui.ribbon_collapsed = false;
                             }
-                        }
-                        if resp.double_clicked() {
-                            app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
+                            ui.data_mut(|d| d.insert_temp(pending, (name.to_string(), active)));
+                        } else if resp.double_clicked() {
+                            // A double-click already ran the single-click action on its first
+                            // release. An inactive tab was selected there, so this second release
+                            // adds the collapse that double-clicking a tab used to do.
+                            let previous = ui.data_mut(|d| d.remove_temp::<(String, bool)>(pending));
+                            if let Some((clicked_name, was_active)) = previous
+                                && clicked_name == name
+                                && !was_active
+                            {
+                                app.ui.ribbon_collapsed = !app.ui.ribbon_collapsed;
+                            }
                         }
                     }
                 });
