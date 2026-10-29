@@ -188,6 +188,7 @@ pub(super) fn place_row(ui: &mut Ui, icon: Icon, label: &str, selected: bool, wi
 
 /// A square button with its title and description beside it (Info, Export).
 pub(super) fn task(ui: &mut Ui, icon: Icon, button: &str, title: &str, detail: &str, enabled: bool) -> bool {
+    let title = tl!(title);
     let t = Tokens::get(ui.ctx());
     let mut clicked = false;
     ui.horizontal_top(|ui| {
