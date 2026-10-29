@@ -337,7 +337,7 @@ Detail in [localization-parity.md](localization-parity.md).
 
 - **English, German and Simplified Chinese only** (#15, #30; Ukrainian PR #34 open). The interface
   reads the shared craft-i18n catalogs and follows the system language; German covers the ribbon,
-  menus, palette, status bar, File tab, dialogs and panes, and Simplified Chinese adds 1,089
+  menus, palette, status bar, File tab, dialogs and panes, and Simplified Chinese adds 1,093
   DeckCraft rows plus the shared rows (dynamic `format!` strings still English). PowerPoint for Mac
   ships 26 languages: 3–16 h per language plus native review. Beta needs at least Spanish, French
   and Japanese as well (~20–35 h).
